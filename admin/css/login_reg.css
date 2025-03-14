@@ -1,0 +1,64 @@
+body {
+    /* background-color: #2E3436; */
+    background: url('../../gif/Vji.gif') no-repeat center;
+    background-size: cover;
+    color: #D3D7CF;
+    font-family: 'DejaVu Sans Mono', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+   /* background-color: #555753;*/
+    border: 2px solid #D3D7CF;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #D3D7CF;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+input {
+    width: 95%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #D3D7CF;
+    border-radius: 5px;
+    background-color: #2E3436;
+    color: #D3D7CF;
+}
+
+button {
+    padding: 10px 20px;
+    border: 1px solid #D3D7CF;
+    border-radius: 5px;
+    background-color: #2E3436;
+    color: #D3D7CF;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #D3D7CF;
+    color: #2E3436;
+}
+
+a {
+    color: #D3D7CF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

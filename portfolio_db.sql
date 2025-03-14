@@ -26,9 +26,6 @@ CREATE TABLE portfolio (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-ALTER TABLE portfolio ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE portfolio ADD COLUMN pdf_file VARCHAR(255);
 
 ALTER TABLE portfolio ADD COLUMN pdf_file VARCHAR(255);
 ALTER TABLE users ADD COLUMN reset_token VARCHAR(255);
@@ -79,35 +76,3 @@ CREATE TABLE tickets (
 );
 
 ALTER TABLE admin ADD COLUMN permissions JSON;
-
-ALTER TABLE users
-ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN IF NOT EXISTS banned BOOLEAN DEFAULT FALSE;
-ALTER TABLE feedback 
-ADD COLUMN status ENUM('open', 'closed') NOT NULL DEFAULT 'open';
-ALTER TABLE feedback 
-MODIFY COLUMN status ENUM('open', 'closed') NOT NULL DEFAULT 'open';
-------
-ALTER TABLE portfolio
-MODIFY COLUMN soft_skills JSON,
-MODIFY COLUMN technical_skills JSON,
-MODIFY COLUMN academic_background JSON,
-MODIFY COLUMN work_experience JSON,
-MODIFY COLUMN projects_publications JSON,
-ADD COLUMN fonts JSON;
----
-CREATE TABLE portfolio (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
-    full_name VARCHAR(255) NOT NULL,
-    contact_info VARCHAR(255) NOT NULL,
-    photo VARCHAR(255) NOT NULL,
-    bio TEXT NOT NULL,
-    skills JSON,
-    academic JSON,
-    work_experience JSON,
-    projects JSON,
-    pdf_path VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
------

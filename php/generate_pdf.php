@@ -1,290 +1,109 @@
 <?php
-declare(strict_types=1);
-
-// Session handling
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// Validate session
+session_start();
 if (!isset($_SESSION['user_id'])) {
-    http_response_code(403);
-    die(json_encode(['error' => 'Authentication required']));
+    die("Access denied. Please <a href='../index.html'>login</a> first.");
 }
 
-// Validate request method
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    die(json_encode(['error' => 'Method not allowed']));
+require('../fpdf/fpdf.php');
+
+class PDF extends FPDF {
+    function Header() {
+        $this->SetFont('Arial', 'B', 16);
+        $this->Cell(0, 10, 'Portfolio', 0, 1, 'C');
+    }
+
+    function Footer() {
+        $this->SetY(-15);
+        $this->SetFont('Arial', 'I', 8);
+        $this->Cell(0, 10, 'Page ' . $this->PageNo(), 0, 0, 'C');
+    }
 }
 
-// Define base directories
-define('BASE_DIR', __DIR__ . '/../');
-define('UPLOAD_DIR', BASE_DIR . 'uploads/');
-define('PDF_DIR', BASE_DIR . 'pdfs/');
+$pdf = new PDF();
+$pdf->AddPage();
+$pdf->SetFont('Arial', '', 12);
 
-try {
-    // Validate and process input
-    $portfolioData = validateAndProcessInput();
-    
-    // Generate PDF
-    $pdfPath = generatePDF($portfolioData);
-    
-    // Save to database
-    saveToDatabase($portfolioData, $pdfPath);
-    
-    echo json_encode([
-        'success' => true,
-        'pdf' => basename($pdfPath)
-    ]);
+// Handle image upload
+if ($_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+    $photo_tmp = $_FILES['photo']['tmp_name'];
+    $photo_name = '../uploads/' . basename($_FILES['photo']['name']);
+    move_uploaded_file($photo_tmp, $photo_name);
 
-} catch (Exception $e) {
-    http_response_code(500);
-    error_log("SYSTEM ERROR: " . $e->getMessage());
-    die(json_encode([
-        'error' => 'Internal server error',
-        'details' => $e->getMessage()
-    ]));
+    // Get image dimensions
+    list($width, $height) = getimagesize($photo_name);
+    $pdf->Image($photo_name, 10, 30, 40); // X=10, Y=30, Width=40
+
+    // Calculate new Y-coordinate based on image height
+    $newY = 30 + ($height * 40 / $width); // Height adjusted to width 40mm
+    $pdf->SetY($newY + 10); // Add some padding below the image
+} else {
+    $photo_name = ''; // Default value if no image is uploaded
+    $pdf->SetY(30); // Start content from Y=30 if no image is uploaded
 }
 
-function validateAndProcessInput(): array {
-    // Validate required fields
-    $required = [
-        'full_name' => [
-            'pattern' => '/^[A-Za-z ]{2,50}$/',
-            'error' => 'Invalid name format'
-        ],
-        'contact_info' => [
-            'pattern' => '/^[+0-9 ]{10,15}$/',
-            'error' => 'Invalid contact format'
-        ],
-        'bio' => [
-            'min' => 10,
-            'max' => 500
-        ]
-    ];
+// Add content to PDF
+$pdf->Cell(40, 10, 'Full Name: ' . $_POST['full_name']);
+$pdf->Ln();
+$pdf->Cell(40, 10, 'Contact Info: ' . $_POST['contact_info']);
+$pdf->Ln();
+$pdf->Cell(40, 10, 'Bio: ' . $_POST['bio']);
+$pdf->Ln();
+$pdf->Cell(40, 10, 'Soft Skills: ' . $_POST['soft_skills']);
+$pdf->Ln();
+$pdf->Cell(40, 10, 'Technical Skills: ' . $_POST['technical_skills']);
+$pdf->Ln();
+$pdf->Cell(40, 10, 'Academic Background: ' . $_POST['academic_background']);
+$pdf->Ln();
+$pdf->Cell(40, 10, 'Work Experience: ' . $_POST['work_experience']);
+$pdf->Ln();
+$pdf->Cell(40, 10, 'Projects/Publications: ' . $_POST['projects_publications']);
+$pdf->Ln();
 
-    $errors = [];
-    foreach ($required as $field => $rules) {
-        $value = trim($_POST[$field] ?? '');
-        
-        // Validate presence
-        if (empty($value)) {
-            $errors[$field] = "Field is required";
-            continue;
-        }
-        
-        // Validate pattern
-        if (isset($rules['pattern']) && !preg_match($rules['pattern'], $value)) {
-            $errors[$field] = $rules['error'];
-        }
-        
-        // Validate length
-        if (isset($rules['min']) && strlen($value) < $rules['min']) {
-            $errors[$field] = "Minimum {$rules['min']} characters required";
-        }
-        
-        if (isset($rules['max']) && strlen($value) > $rules['max']) {
-            $errors[$field] = "Maximum {$rules['max']} characters allowed";
-        }
-    }
+// Save PDF
+$pdf_file = '../uploads/portfolio_' . time() . '.pdf';
+$pdf->Output('F', $pdf_file);
 
-    // Validate file upload
-    if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
-        $errors['photo'] = 'Valid photo required';
-    }
+// Store data in database
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "portfolio_db";
 
-    if (!empty($errors)) {
-        http_response_code(400);
-        die(json_encode(['errors' => $errors]));
-    }
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-    // Process file upload
-    $photoPath = processUploadedFile();
-
-    return [
-        'user_id' => (int)$_SESSION['user_id'],
-        'full_name' => htmlspecialchars($_POST['full_name']),
-        'contact_info' => htmlspecialchars($_POST['contact_info']),
-        'bio' => htmlspecialchars($_POST['bio']),
-        'skills' => $_POST['skills'] ?? [],
-        'academic' => $_POST['academic'] ?? [],
-        'work' => $_POST['work'] ?? [],
-        'projects' => $_POST['projects'] ?? [],
-        'photo' => $photoPath
-    ];
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-function processUploadedFile(): string {
-    // Create upload directory
-    if (!file_exists(UPLOAD_DIR)) {
-        if (!mkdir(UPLOAD_DIR, 0755, true)) {
-            throw new Exception('Failed to create upload directory');
-        }
-    }
+$user_id = $_SESSION['user_id'];
+$full_name = $_POST['full_name'];
+$contact_info = $_POST['contact_info'];
+$bio = $_POST['bio'];
+$soft_skills = $_POST['soft_skills'];
+$technical_skills = $_POST['technical_skills'];
+$academic_background = $_POST['academic_background'];
+$work_experience = $_POST['work_experience'];
+$projects_publications = $_POST['projects_publications'];
 
-    // Validate file type
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mime = finfo_file($finfo, $_FILES['photo']['tmp_name']);
-    if (!in_array($mime, ['image/jpeg', 'image/png'])) {
-        throw new Exception('Invalid file type. Only JPG/PNG allowed');
-    }
+$sql = "INSERT INTO portfolio (user_id, full_name, contact_info, photo, bio, soft_skills, technical_skills, academic_background, work_experience, projects_publications, pdf_file, created_at) 
+        VALUES ('$user_id', '$full_name', '$contact_info', '$photo_name', '$bio', '$soft_skills', '$technical_skills', '$academic_background', '$work_experience', '$projects_publications', '$pdf_file', NOW())";
 
-    // Generate unique filename
-    $filename = uniqid() . '_' . basename($_FILES['photo']['name']);
-    $targetPath = UPLOAD_DIR . $filename;
-
-    if (!move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
-        throw new Exception('File upload failed. Check permissions.');
-    }
-
-    return $targetPath;
-}
-
-function generatePDF(array $data): string {
-    // Create PDF directory
-    if (!file_exists(PDF_DIR)) {
-        if (!mkdir(PDF_DIR, 0755, true)) {
-            throw new Exception('Failed to create PDF directory');
-        }
-    }
-
-    require_once(BASE_DIR . 'fpdf/fpdf.php');
-    
-    $pdf = new FPDF();
-    $pdf->AddPage();
-    
-    // Add content
-    $pdf->SetFont('Arial', 'B', 16);
-    $pdf->Cell(0, 10, 'Portfolio', 0, 1, 'C');
-    
-    // Personal Info
-    $pdf->SetFont('Arial', '', 12);
-    $pdf->Cell(0, 10, 'Name: ' . $data['full_name'], 0, 1);
-    $pdf->Cell(0, 10, 'Contact: ' . $data['contact_info'], 0, 1);
-    $pdf->MultiCell(0, 10, 'Bio: ' . $data['bio']);
-    
-    // Skills
-    if (!empty($data['skills'])) {
-        $pdf->Cell(0, 10, 'Skills:', 0, 1);
-        foreach ($data['skills'] as $skill) {
-            $name = htmlspecialchars($skill['name'] ?? 'Unnamed Skill');
-            $type = htmlspecialchars($skill['type'] ?? 'Unknown Type');
-            $pdf->Cell(0, 10, "- {$name} ({$type})", 0, 1);
-        }
-    }
-    
-    // Academic
-    if (!empty($data['academic'])) {
-        $pdf->Cell(0, 10, 'Academic Background:', 0, 1);
-        foreach ($data['academic'] as $entry) {
-            $text = sprintf("%s - %s (%s to %s)",
-                htmlspecialchars($entry['institution'] ?? ''),
-                htmlspecialchars($entry['degree'] ?? ''),
-                htmlspecialchars($entry['start'] ?? ''),
-                htmlspecialchars($entry['end'] ?? '')
-            );
-            $pdf->MultiCell(0, 10, $text);
-        }
-    }
-    
-    // Work Experience
-    if (!empty($data['work'])) {
-        $pdf->Cell(0, 10, 'Work Experience:', 0, 1);
-        foreach ($data['work'] as $entry) {
-            $text = sprintf("%s at %s (%s to %s)",
-                htmlspecialchars($entry['position'] ?? ''),
-                htmlspecialchars($entry['company'] ?? ''),
-                htmlspecialchars($entry['start'] ?? ''),
-                htmlspecialchars($entry['end'] ?? '')
-            );
-            $pdf->MultiCell(0, 10, $text);
-        }
-    }
-    
-    // Projects
-    if (!empty($data['projects'])) {
-        $pdf->Cell(0, 10, 'Projects:', 0, 1);
-        foreach ($data['projects'] as $entry) {
-            $text = sprintf("%s: %s",
-                htmlspecialchars($entry['title'] ?? ''),
-                htmlspecialchars($entry['description'] ?? '')
-            );
-            if (!empty($entry['link'])) {
-                $text .= "\nLink: " . htmlspecialchars($entry['link']);
+if ($conn->query($sql) === TRUE) {
+    echo "<div style='font-family: Arial, sans-serif; color: green; animation: fadeIn 3s; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;'>Portfolio saved successfully! <a href='$pdf_file' style='color: blue;'>Download PDF</a>.
+    </div>
+          <style>
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
             }
-            $pdf->MultiCell(0, 10, $text);
-        }
-    }
-    
-    // Add photo
-    if (file_exists($data['photo'])) {
-        $pdf->Image($data['photo'], 10, $pdf->GetY(), 50);
-    }
-    
-    // Save PDF
-    $filename = PDF_DIR . 'portfolio_' . uniqid() . '.pdf';
-    $pdf->Output('F', $filename);
-    
-    if (!file_exists($filename)) {
-        throw new Exception('PDF generation failed');
-    }
-    
-    return $filename;
+            body {
+                background: url('../gif/J59.gif') no-repeat center center fixed;
+                background-size: cover;
+            }
+          </style>";
+} else {
+    echo "Error: " . $sql . "<br>" . $conn->error;
 }
 
-function saveToDatabase(array $data, string $pdfPath): void {
-    $db = new mysqli("localhost", "root", "", "portfolio_db");
-    if ($db->connect_errno) {
-        throw new Exception("Database connection failed: " . $db->connect_error);
-    }
-
-    $sql = "INSERT INTO portfolio (
-        user_id, full_name, contact_info, photo, bio,
-        skills, academic, work_experience, projects, pdf_path
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-    $stmt = $db->prepare($sql);
-    
-    if (!$stmt) {
-        throw new Exception("Prepare failed: " . $db->error);
-    }
-
-    // Create variables for JSON encoded values
-    $skills = json_encode($data['skills']);
-    $academic = json_encode($data['academic']);
-    $work = json_encode($data['work']);
-    $projects = json_encode($data['projects']);
-
-    $stmt->bind_param("isssssssss",
-        $data['user_id'],
-        $data['full_name'],
-        $data['contact_info'],
-        $data['photo'],
-        $data['bio'],
-        $skills,    // Now using variable instead of direct json_encode()
-        $academic,  // Same here
-        $work,      // And here
-        $projects,  // And here
-        $pdfPath
-    );
-
-    if (!$stmt->execute()) {
-        throw new Exception("Execution failed: " . $stmt->error);
-    }
-
-    $stmt->close();
-    $db->close();
-
-
-
-
-
-    // After successful PDF generation
-$pdfUrl = '/pdfs/' . basename($pdfPath);
-echo json_encode([
-    'success' => true,
-    'pdf' => basename($pdfPath),
-    'download_url' => $pdfUrl
-]);
-}
+$conn->close();
+?>

@@ -9,112 +9,34 @@
 <body>
     <div class="container">
         <h1>Create Your Portfolio</h1>
-        <form id="portfolioForm" action="php/generate_pdf.php" method="POST" enctype="multipart/form-data">
-            <!-- Personal Information -->
+        <form action="php/generate_pdf.php" method="POST" enctype="multipart/form-data">
             <h2>Personal Information</h2>
-            <div class="form-group">
-                <label for="full_name">Full Name:</label>
-                <input type="text" id="full_name" name="full_name" required 
-                       minlength="2" maxlength="50" pattern="[A-Za-z ]+">
-            </div>
-            <div class="form-group">
-                <label for="contact_info">Contact Information:</label>
-                <input type="text" id="contact_info" name="contact_info" required
-                       pattern="[+0-9 ]{10,15}">
-            </div>
-            <div class="form-group">
-                <label for="photo">Upload Photo (JPG/PNG, max 2MB):</label>
-                <input type="file" id="photo" name="photo" accept=".jpg,.png" required>
-            </div>
-            <div class="form-group">
-                <label for="bio">Short Bio (10-500 characters):</label>
-                <textarea id="bio" name="bio" rows="4" minlength="10" maxlength="500" required></textarea>
-            </div>
+            <label for="full_name">Full Name:</label>
+            <input type="text" id="full_name" name="full_name" required>
+            <label for="contact_info">Contact Information:</label>
+            <input type="text" id="contact_info" name="contact_info" required>
+            <label for="photo">Upload Photo (JPG/PNG):</label>
+            <input type="file" id="photo" name="photo" accept=".jpg,.png" required>
+            <label for="bio">Short Bio:</label>
+            <textarea id="bio" name="bio" rows="4" required></textarea>
 
-            <!-- Dynamic Sections -->
-            <!-- Skills Section -->
-            <div data-section="skills">
-                <h2>Skills
-                    <select class="font-selector" data-section="skills">
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Courier New">Courier New</option>
-                    </select>
-                </h2>
-                <div id="skills-container">
-                    <div class="skill-entry">
-                        <input type="text" name="skills[][name]" placeholder="Skill name">
-                        <select name="skills[][type]">
-                            <option value="soft">Soft Skill</option>
-                            <option value="technical">Technical Skill</option>
-                        </select>
-                        <button type="button" class="remove-btn">×</button>
-                    </div>
-                </div>
-                <button type="button" id="add-skill">Add Skill</button>
-            </div>
+            <h2>Skills</h2>
+            <label for="soft_skills">Soft Skills:</label>
+            <textarea id="soft_skills" name="soft_skills" rows="4" required></textarea>
+            <label for="technical_skills">Technical Skills:</label>
+            <textarea id="technical_skills" name="technical_skills" rows="4" required></textarea>
 
-            <!-- Academic Background -->
-            <div data-section="academic">
-                <h2>Academic Background
-                    <select class="font-selector" data-section="academic">
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Courier New">Courier New</option>
-                    </select>
-                </h2>
-                <div id="academic-container">
-                    <div class="academic-entry">
-                        <input type="text" name="academic[][institution]" placeholder="Institution">
-                        <input type="text" name="academic[][degree]" placeholder="Degree">
-                        <input type="date" name="academic[][start]">
-                        <input type="date" name="academic[][end]">
-                        <button type="button" class="remove-btn">×</button>
-                    </div>
-                </div>
-                <button type="button" id="add-academic">Add Entry</button>
-            </div>
+            <h2>Academic Background</h2>
+            <label for="academic_background">Academic Background:</label>
+            <textarea id="academic_background" name="academic_background" rows="4"></textarea>
 
-            <!-- Work Experience -->
-            <div data-section="work">
-                <h2>Work Experience
-                    <select class="font-selector" data-section="work">
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Courier New">Courier New</option>
-                    </select>
-                </h2>
-                <div id="work-container">
-                    <div class="work-entry">
-                        <input type="text" name="work[][company]" placeholder="Company">
-                        <input type="text" name="work[][position]" placeholder="Position">
-                        <input type="date" name="work[][start]">
-                        <input type="date" name="work[][end]">
-                        <button type="button" class="remove-btn">×</button>
-                    </div>
-                </div>
-                <button type="button" id="add-work">Add Entry</button>
-            </div>
+            <h2>Work Experience</h2>
+            <label for="work_experience">Work Experience:</label>
+            <textarea id="work_experience" name="work_experience" rows="4" required></textarea>
 
-            <!-- Projects/Publications -->
-            <div data-section="projects">
-                <h2>Projects/Publications
-                    <select class="font-selector" data-section="projects">
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Courier New">Courier New</option>
-                    </select>
-                </h2>
-                <div id="project-container">
-                    <div class="project-entry">
-                        <input type="text" name="projects[][title]" placeholder="Title">
-                        <textarea name="projects[][description]" placeholder="Description"></textarea>
-                        <input type="url" name="projects[][link]" placeholder="URL (optional)">
-                        <button type="button" class="remove-btn">×</button>
-                    </div>
-                </div>
-                <button type="button" id="add-project">Add Entry</button>
-            </div>
+            <h2>Projects/Publications</h2>
+            <label for="projects_publications">Projects/Publications:</label>
+            <textarea id="projects_publications" name="projects_publications" rows="4"></textarea>
 
             <button type="submit">Generate PDF</button>
         </form>
@@ -122,9 +44,6 @@
         <a href="php/history.php"><button>View History</button></a>
         <a href="php/dashboard.php"><button>Dashboard</button></a>
         <a href="php/logout.php"><button>Logout</button></a>
-        <!-- Add this hidden download link -->
-<a id="downloadLink" style="display: none;"></a>
     </div>
-    <script src="js/scripts.js"></script>
 </body>
 </html>

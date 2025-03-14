@@ -1,5 +1,7 @@
 body {
-    background-color: #2E3436;
+    /* background-color: #2E3436; */
+    background: url('../gif/J4o.gif') no-repeat center;
+    background-size: cover;
     color: #D3D7CF;
     font-family: 'DejaVu Sans Mono', monospace;
     display: flex;
