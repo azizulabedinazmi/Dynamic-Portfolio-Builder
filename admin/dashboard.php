@@ -21,9 +21,9 @@ $portfolios = $conn->query("SELECT COUNT(*) FROM portfolio")->fetch_row()[0];
     <div class="sidebar">
         <h2>Admin Panel</h2>
         <a href="dashboard.php">Dashboard</a>
-        <a href="/Lab2_test2/admin/php/manage_users.php">User Management</a>
-        <a href="/Lab2_test2/admin/php/manage_portfolios.php">Portfolio Management</a>
-        <a href="/Lab2_test2/admin/php/manage_feedback.php">Feedback Management</a>
+        <a href="./php/manage_users.php">User Management</a>
+        <a href="./php/manage_portfolios.php">Portfolio Management</a>
+        <a href="./php/manage_feedback.php">Feedback Management</a>
         <a href="../php/logout.php">Logout</a>
     </div>
 

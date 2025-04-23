@@ -34,6 +34,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['delete_user'])) {
         $user_id = intval($_POST['user_id']);
         
+        // Delete related records in audit_logs first
+        $stmt = $conn->prepare("DELETE FROM audit_logs WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+
+        // Delete related records in portfolio table first
+        $stmt = $conn->prepare("DELETE FROM portfolio WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+
+        // Then delete the user
         $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();

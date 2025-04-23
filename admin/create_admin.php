@@ -1,7 +1,7 @@
 <?php
 // create_admin.php - UNSECURED ADMIN CREATION (FOR DEMONSTRATION ONLY)
 session_start();
-include $_SERVER['DOCUMENT_ROOT'] . '/Lab2_test2/db/db.php'; // Database connection
+include $_SERVER['DOCUMENT_ROOT'] . '/Dynamic-Portfolio-Builder-main/db/db.php'; // Database connection
 
 $error = '';
 $success = '';

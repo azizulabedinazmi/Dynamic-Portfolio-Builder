@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo "Expiry: $expiry<br>";
 
             // Send the reset link via email (for simplicity, we'll just display it)
-            $reset_link = "http://localhost/Lab2_test2/php/reset_password.php?token=$token";
+            $reset_link = "./reset_password.php?token=$token";
             echo "Reset link: <a href='$reset_link'>$reset_link</a>";
         } else {
             echo "Error: " . $sql . "<br>" . $conn->error;
