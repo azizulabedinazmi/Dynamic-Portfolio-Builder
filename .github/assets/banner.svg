@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fdf2f8"/><stop offset=".5" stop-color="#eef2ff"/><stop offset="1" stop-color="#ecfeff"/></linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#6366f1" flood-opacity=".18"/></filter>
+    <style>.float{animation:f 4s ease-in-out infinite}.f2{animation-delay:-2s}@keyframes f{50%{transform:translateY(-8px)}}</style>
+  </defs>
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <circle cx="1080" cy="40" r="120" fill="#f9a8d4" opacity=".25"/><circle cx="760" cy="300" r="90" fill="#a5b4fc" opacity=".25"/>
+  <!-- stacked portfolio cards -->
+  <g transform="translate(720 50) rotate(-6)" filter="url(#sh)"><rect width="250" height="200" rx="16" fill="#fff"/><rect x="20" y="20" width="210" height="70" rx="10" fill="#c7d2fe"/></g>
+  <g transform="translate(800 48)" filter="url(#sh)"><g class="float">
+    <rect width="300" height="220" rx="18" fill="#fff"/>
+    <circle cx="50" cy="52" r="26" fill="#f472b6"/><circle cx="50" cy="45" r="9" fill="#fff"/><path d="M33 68a17 13 0 0 1 34 0z" fill="#fff"/>
+    <rect x="92" y="36" width="140" height="12" rx="6" fill="#312e81"/><rect x="92" y="58" width="96" height="9" rx="4" fill="#a5b4fc"/>
+    <rect x="24" y="100" width="252" height="8" rx="4" fill="#e0e7ff"/><rect x="24" y="116" width="210" height="8" rx="4" fill="#e0e7ff"/>
+    <rect x="24" y="144" width="74" height="50" rx="8" fill="#fbcfe8"/><rect x="113" y="144" width="74" height="50" rx="8" fill="#c7d2fe"/><rect x="202" y="144" width="74" height="50" rx="8" fill="#a5f3fc"/>
+  </g></g>
+  <g transform="translate(1040 210)" filter="url(#sh)"><g class="float f2"><rect width="110" height="70" rx="12" fill="#4f46e5"/><text x="55" y="44" text-anchor="middle" font-family="Consolas, Menlo, monospace" font-size="18" font-weight="700" fill="#fff">PDF ↓</text></g></g>
+  <text x="70" y="128" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-style="italic" fill="#db2777">create · manage · share</text>
+  <text x="66" y="200" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="64" font-weight="800" fill="#1e1b4b">Dynamic Portfolio</text>
+  <text x="66" y="262" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="64" font-weight="300" fill="#4f46e5">Builder</text>
+  <text x="330" y="258" font-family="Consolas, Menlo, monospace" font-size="16" fill="#6366f1">PHP · MySQL · FPDF · admin panel</text>
+</svg>

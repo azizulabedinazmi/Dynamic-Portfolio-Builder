@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/banner.svg" alt="Dynamic Portfolio Builder banner" width="100%">
+</p>
+
 # 🌟 Dynamic Portfolio Builder 🌟
 
 Welcome to the **Dynamic Portfolio Builder**! This project is a web-based application that allows users to create, manage, and share professional portfolios. It also includes an admin panel for managing users, portfolios, and feedback. 🚀
